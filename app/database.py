@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import time
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Iterator
 
 from sqlalchemy import create_engine, event
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.config import settings
@@ -84,11 +86,24 @@ def session_scope() -> Iterator[Session]:
         session.close()
 
 
-def init_db() -> None:
-    """Crée les tables manquantes et amorce les données de référence."""
+def init_db(max_retries: int = 5, delay_seconds: float = 2.0) -> None:
+    """Crée les tables manquantes et amorce les données de référence.
+
+    En environnement cloud, la base peut ne pas être encore prête au premier boot.
+    On retente un petit nombre de fois avant d’échouer de manière explicite.
+    """
     from app import models  # noqa: F401  (enregistre les mappings)
 
-    models.Base.metadata.create_all(bind=engine)
+    last_error: Exception | None = None
+    for attempt in range(1, max_retries + 1):
+        try:
+            models.Base.metadata.create_all(bind=engine)
+            break
+        except OperationalError as exc:
+            last_error = exc
+            if attempt == max_retries:
+                raise
+            time.sleep(delay_seconds)
 
     from app.services.admin_setup import ensure_bootstrap
 

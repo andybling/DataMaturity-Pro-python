@@ -5,7 +5,7 @@
   <div class="wrap split">
     <div>
       <span class="badge badge-lg">Méthode de diagnostic experte</span>
-      <h1 class="mt-2">Savoir où vous en êtes sur la data avant d'engager un budget</h1>
+      <h1 class="mt-2">Identifier rapidement les priorités data avant d’engager un budget</h1>
       <p class="hero-lead">{{ criteria_count }} critères, 7 dimensions, un score sur {{ max_total_score }} points.
         Dix minutes pour un diagnostic objectif de la maturité data de votre organisation,
         avec un rapport que vous pouvez présenter en comité de direction.</p>
@@ -13,6 +13,7 @@
         <a class="btn btn-primary" href="/diagnostic">Démarrer le diagnostic gratuit</a>
         <a class="btn btn-ghost" href="/methodologie">Voir la méthodologie</a>
       </div>
+      <p class="small muted mt-3 mb-0">Une lecture rapide, structurée et directement exploitable pour prioriser les actions à venir.</p>
       <div class="hero-meta">
         <div><strong>{{ stats.completed }}</strong><span>diagnostics réalisés</span></div>
         <div><strong>{{ stats.average | percent if stats.average else '—' }}</strong><span>score moyen constaté</span></div>
@@ -27,6 +28,7 @@
         <li>Un radar de positionnement imprimable</li>
         <li>Vos forces et vos points de vigilance</li>
       </ul>
+      <div class="alert alert-info mt-2 mb-2">Le diagnostic est pensé pour être utilisé en préparation d’un échange de direction, d’un comité ou d’un plan d’investissement data.</div>
       <p class="small muted mb-0">Aucune carte bancaire demandée. Le rapport détaillé
         avec recommandations et feuille de route est proposé ensuite, en option.</p>
     </div>

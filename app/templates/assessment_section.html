@@ -16,6 +16,7 @@
       </div>
     </div>
     <div class="progress"><i style="width: {{ progress.percentage }}%"></i></div>
+    <p class="small muted mt-2 mb-0">Progresser section par section permet de garder un meilleur rythme et d’éviter la fatigue.</p>
     <div class="steps">
       {% for d in dimensions %}
         {% if loop.index == step %}
@@ -37,7 +38,7 @@
         <div class="criterion {{ 'missing' if missing and criterion.code in missing else '' }}">
           <div class="criterion-head">
             <h3>{{ loop.index }}. {{ criterion.name }}</h3>
-            <div class="small muted">Vous pouvez penser à : {{ criterion.name | lower }} · {{ criterion.name | lower }} · {{ criterion.name | lower }}</div>
+            <div class="small muted">Pensez à la manière dont cette pratique se traduit concrètement dans votre organisation.</div>
             <span class="badge {{ 'badge-danger' if criterion.weight == 3 else ('badge-info' if criterion.weight == 2 else 'badge-muted') }}">
               {{ {1: 'Pas important', 2: 'Important', 3: 'Très important'}[criterion.weight] }}
             </span>

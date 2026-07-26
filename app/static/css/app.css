@@ -239,6 +239,8 @@ textarea { min-height: 96px; resize: vertical; }
 
 /* ---------- résultats ---------- */
 .score-hero { display: grid; gap: 34px; grid-template-columns: 1fr 1fr; align-items: center; }
+.card ul { padding-left: 20px; margin: 0; color: var(--ink-soft); }
+.card li { margin-bottom: 8px; }
 @media (max-width: 880px) { .score-hero { grid-template-columns: 1fr; } }
 .score-big { font-size: clamp(3rem, 8vw, 4.6rem); font-weight: 800; line-height: 1; letter-spacing: -.03em; color: var(--brand); }
 .score-sub { font-size: 1rem; color: var(--muted); }

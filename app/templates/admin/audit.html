@@ -1,0 +1,27 @@
+{% extends "admin/base.html" %}
+{% block body %}
+<div class="admin-head">
+  <div>
+    <h1>Journal des opérations</h1>
+    <p class="muted mb-0">300 dernières entrées. Traçabilité des paiements, connexions et modifications.</p>
+  </div>
+</div>
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Horodatage</th><th>Acteur</th><th>Action</th><th>Cible</th><th>Détail</th></tr></thead>
+    <tbody>
+      {% for row in rows %}
+        <tr>
+          <td class="small nowrap">{{ row.at | datetime_fr }}</td>
+          <td class="small">{{ row.actor }}</td>
+          <td><span class="badge {{ 'badge-ok' if 'paid' in row.action else ('badge-danger' if 'failed' in row.action or 'mismatch' in row.action else 'badge-muted') }}">{{ row.action }}</span></td>
+          <td class="small"><code>{{ row.target[:28] }}</code></td>
+          <td class="small muted">{{ row.detail }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="5" class="muted">Journal vide.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+# Secrets — ne jamais committer
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Données locales
+data/
+*.db
+*.db-wal
+*.db-shm
+
+# Système
+.DS_Store
+Thumbs.db

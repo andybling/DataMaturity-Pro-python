@@ -1,0 +1,124 @@
+{% extends "admin/base.html" %}
+{% block body %}
+<div class="admin-head">
+  <div>
+    <a class="small muted" href="/admin/prospects">← Tous les prospects</a>
+    <h1>{{ assessment.company_name }}</h1>
+    <p class="muted mb-0">{{ assessment.sector }} · {{ assessment.country }} ·
+      {{ assessment.company_size }} collaborateurs</p>
+  </div>
+  <div class="hero-actions" style="margin:0">
+    <a class="btn btn-ghost btn-sm" href="/resultats/{{ assessment.public_id }}">Voir ses résultats</a>
+    {% if assessment.is_unlocked %}
+      <a class="btn btn-primary btn-sm" href="/resultats/{{ assessment.public_id }}/rapport?jeton={{ report_token }}">Ouvrir le rapport</a>
+    {% endif %}
+    <a class="btn btn-ghost btn-sm" href="mailto:{{ assessment.contact_email }}">Écrire au contact</a>
+  </div>
+</div>
+
+<div class="grid grid-4">
+  <div class="kpi kpi-brand"><span>Score</span>
+    <strong>{% if score %}{{ score.percentage | percent(1) }}{% else %}—{% endif %}</strong>
+    <em>{{ assessment.total_score }}/{{ assessment.max_score }} points</em></div>
+  <div class="kpi"><span>Niveau</span><strong>{% if score %}{{ score.level.name }}{% else %}—{% endif %}</strong></div>
+  <div class="kpi"><span>Statut</span><strong>{{ assessment.status }}</strong>
+    <em>{{ assessment.answers | length }} critères renseignés</em></div>
+  <div class="kpi"><span>Chiffre d'affaires généré</span>
+    <strong>{{ (assessment.orders | selectattr('status', 'equalto', 'paid') | map(attribute='amount_xof') | sum) | xof }}</strong></div>
+</div>
+
+<div class="grid grid-2 mt-3">
+  <div class="card">
+    <h3>Fiche contact</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <tbody>
+          <tr><th>Contact</th><td>{{ assessment.contact_name }}{% if assessment.contact_role %} — {{ assessment.contact_role }}{% endif %}</td></tr>
+          <tr><th>Email</th><td><a href="mailto:{{ assessment.contact_email }}">{{ assessment.contact_email }}</a></td></tr>
+          <tr><th>Téléphone</th><td>{{ assessment.contact_phone or '—' }}</td></tr>
+          <tr><th>Canal d'acquisition</th><td>{{ assessment.acquisition_channel or '—' }}</td></tr>
+          <tr><th>Chiffre d'affaires déclaré</th><td>{{ assessment.annual_revenue_band or '—' }}</td></tr>
+          <tr><th>Créé le</th><td>{{ assessment.created_at | datetime_fr }}</td></tr>
+          <tr><th>Terminé le</th><td>{{ assessment.completed_at | datetime_fr }}</td></tr>
+          <tr><th>Devise préférée</th><td>{{ assessment.currency }}</td></tr>
+          <tr><th>Référence</th><td><code class="small">{{ assessment.public_id }}</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="mt-3">Suivi commercial</h3>
+    <form method="post" action="/admin/prospects/{{ assessment.public_id }}">
+      <div class="field">
+        <label for="lead_stage">Étape</label>
+        <select id="lead_stage" name="lead_stage">
+          {% for stage in stages %}
+            <option value="{{ stage }}" {{ 'selected' if assessment.lead_stage == stage else '' }}>{{ stage }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="lead_notes">Notes internes</label>
+        <textarea id="lead_notes" name="lead_notes" placeholder="Compte rendu d'appel, objections, prochaine action...">{{ assessment.lead_notes }}</textarea>
+      </div>
+      <button class="btn btn-primary btn-sm" type="submit">Enregistrer</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>Commandes</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <thead><tr><th>Référence</th><th>Offre</th><th class="num">Montant</th><th>Statut</th></tr></thead>
+        <tbody>
+          {% for order in assessment.orders %}
+            <tr>
+              <td><code class="small">{{ order.reference }}</code>
+                <div class="small muted">{{ order.provider }} · code {{ order.access_code }}</div></td>
+              <td>{{ order.plan_code }}</td>
+              <td class="num">{{ order.amount_minor | money(order.currency) }}</td>
+              <td><span class="badge {{ 'badge-ok' if order.status == 'paid' else ('badge-warn' if order.status == 'pending' else 'badge-muted') }}">{{ order.status }}</span></td>
+            </tr>
+          {% else %}
+            <tr><td colspan="4" class="muted">Aucune commande.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if score %}
+      <h3 class="mt-3">Scores par dimension</h3>
+      {% for dim in score.dimensions %}
+        <div class="dimension-row">
+          <span class="dimension-name">{{ dim.short_name }}</span>
+          <span class="dimension-value">{{ dim.percentage | percent }}</span>
+          <span class="bar"><i style="width:{{ dim.percentage }}%;background:{{ dim.color }}"></i></span>
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+</div>
+
+{% if analysis %}
+  <div class="card mt-3">
+    <h3>Argumentaire commercial généré</h3>
+    <p class="small muted">Éléments factuels à reprendre lors de la prise de contact.</p>
+    <p><strong>{{ analysis.headline }}</strong></p>
+    {% for para in analysis.executive_summary %}<p class="small">{{ para }}</p>{% endfor %}
+    <div class="table-wrap mt-2">
+      <table class="compact">
+        <thead><tr><th>#</th><th>Action prioritaire</th><th>Dimension</th><th>Priorité</th><th class="num">Gain</th></tr></thead>
+        <tbody>
+          {% for reco in analysis.recommendations[:8] %}
+            <tr><td class="num">{{ reco.priority_rank }}</td><td>{{ reco.action }}</td>
+              <td>{{ reco.dimension_name }}</td><td>{{ reco.priority_label }}</td>
+              <td class="num">+{{ reco.points_gain }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="small muted mt-2 mb-0">Valeur annuelle estimée en jeu, toutes dimensions :
+      <strong>{{ analysis.total_value_at_stake_xof | xof }}</strong> —
+      argument de proportionnalité face au prix du rapport.</p>
+  </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Baromètre de la maturité data — {{ settings.brand_name }}{% endblock %}
+{% block body %}
+<section class="section">
+  <div class="wrap">
+    <h1>Baromètre de la maturité data</h1>
+    <p class="muted">Moyennes agrégées et anonymisées des diagnostics réalisés sur la plateforme.
+      Aucun segment n'est publié en dessous de {{ barometer.threshold }} organisations évaluées.</p>
+
+    {% if not barometer.publishable %}
+      <div class="alert alert-info">L'échantillon est encore trop réduit pour publier des moyennes
+        statistiquement honnêtes. Cette page s'enrichira au fil des diagnostics réalisés.</div>
+    {% else %}
+      <div class="grid grid-4 mt-3">
+        <div class="kpi kpi-brand"><span>Organisations évaluées</span><strong>{{ barometer.overall.sample }}</strong></div>
+        <div class="kpi kpi-brand"><span>Score moyen</span><strong>{{ barometer.overall.average | percent }}</strong></div>
+        <div class="kpi"><span>Médiane</span><strong>{{ barometer.overall.median | percent }}</strong></div>
+        <div class="kpi"><span>Niveau moyen</span><strong>{{ barometer.overall.level_name }}</strong></div>
+      </div>
+
+      <h2 class="mt-4">Moyenne par dimension</h2>
+      <div class="card">
+        {% for code, label in barometer.dimension_labels.items() %}
+          {% set value = barometer.overall.dimension_averages.get(code, 0) %}
+          <div class="dimension-row">
+            <span class="dimension-name">{{ label }}</span>
+            <span class="dimension-value">{{ value | percent }}</span>
+            <span class="bar"><i style="width:{{ value }}%;background:var(--brand)"></i></span>
+          </div>
+        {% endfor %}
+      </div>
+
+      {% if barometer.sectors %}
+        <h2 class="mt-4">Par secteur</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Secteur</th><th class="num">Organisations</th><th class="num">Moyenne</th><th class="num">Médiane</th><th>Niveau moyen</th></tr></thead>
+            <tbody>
+              {% for seg in barometer.sectors %}
+                <tr><td>{{ seg.label }}</td><td class="num">{{ seg.sample }}</td>
+                  <td class="num">{{ seg.average | percent }}</td><td class="num">{{ seg.median | percent }}</td>
+                  <td><span class="badge badge-muted">{{ seg.level_name }}</span></td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
+
+      {% if barometer.countries %}
+        <h2 class="mt-4">Par pays</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Pays</th><th class="num">Organisations</th><th class="num">Moyenne</th><th class="num">Médiane</th></tr></thead>
+            <tbody>
+              {% for seg in barometer.countries %}
+                <tr><td>{{ seg.label }}</td><td class="num">{{ seg.sample }}</td>
+                  <td class="num">{{ seg.average | percent }}</td><td class="num">{{ seg.median | percent }}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
+    {% endif %}
+
+    <div class="card mt-4 center">
+      <h3>Comparez votre organisation à ces moyennes</h3>
+      <a class="btn btn-primary" href="/diagnostic">Lancer mon diagnostic gratuit</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

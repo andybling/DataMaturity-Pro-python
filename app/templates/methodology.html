@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Méthodologie — {{ settings.brand_name }}{% endblock %}
+{% block body %}
+<section class="section">
+  <div class="wrap-narrow">
+    <h1>Méthodologie</h1>
+    <p class="muted">Le diagnostic repose sur la grille de maturité data de Limpida Consulting (2024),
+      appliquée sans modification de sa structure ni de ses pondérations.</p>
+
+    <div class="card mt-3">
+      <h3>Formule de calcul</h3>
+      <p class="mb-0"><code>score du critère = réponse (0 à 3) × poids du critère × poids de la dimension</code></p>
+      <p class="small muted mt-2 mb-0">Le score maximum atteignable est de {{ max_total_score }} points,
+        répartis sur {{ criteria_count }} critères et 7 dimensions. Le pourcentage global est le rapport
+        entre le score obtenu et ce maximum.</p>
+    </div>
+
+    <h2 class="mt-4">Niveaux de maturité</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Niveau</th><th>Plage</th><th>Lecture</th></tr></thead>
+        <tbody>
+          {% for lvl in levels %}
+            <tr>
+              <td><span class="badge level-{{ lvl.code }}">{{ lvl.name }}</span></td>
+              <td class="nowrap">{{ lvl.min_pct | round | int }} % – {{ (lvl.max_pct if lvl.max_pct <= 100 else 100) | round | int }} %</td>
+              <td>{{ lvl.summary }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="mt-4">Dimensions et pondérations</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Dimension</th><th class="num">Poids</th><th class="num">Critères</th><th class="num">Points max</th></tr></thead>
+        <tbody>
+          {% for dim in dimensions %}
+            <tr>
+              <td>{{ dim.name }}</td>
+              <td class="num">{{ dim.weight }}</td>
+              <td class="num">{{ dim.criteria | length }}</td>
+              <td class="num">{{ dim.max_score }}</td>
+            </tr>
+          {% endfor %}
+          <tr><td><strong>Total</strong></td><td class="num">—</td><td class="num"><strong>{{ criteria_count }}</strong></td><td class="num"><strong>{{ max_total_score }}</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="mt-4">Comment lire les résultats</h2>
+    <p>Les dimensions Gouvernance, Qualité, Sécurité et Infrastructure portent un poids de 3.
+      Un critère mal noté y coûte trois fois plus de points qu'ailleurs : c'est aussi là que
+      l'effort de progression rapporte le plus. Les recommandations du rapport détaillé sont
+      classées selon ce rendement, et non selon la facilité de mise en oeuvre.</p>
+    <p>L'analyse est produite par un moteur de règles déterministe : à réponses identiques,
+      le rapport est strictement identique. Aucune génération aléatoire n'intervient,
+      ce qui rend le résultat reproductible et vérifiable.</p>
+
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="/diagnostic">Démarrer le diagnostic</a>
+      <a class="btn btn-ghost" href="/tarifs">Voir les tarifs</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

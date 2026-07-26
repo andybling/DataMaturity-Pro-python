@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ settings.brand_name }}{% endblock %}</title>
+  <meta name="description" content="{% block description %}{{ settings.brand_tagline }}{% endblock %}">
+  <link rel="stylesheet" href="/static/css/app.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%234f46e5'/><text x='16' y='22' font-size='16' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'>D</text></svg>">
+</head>
+<body>
+<header class="topbar no-print">
+  <div class="wrap topbar-inner">
+    <a class="brand" href="/"><span class="brand-mark">DM</span> {{ settings.brand_name }}</a>
+    <nav class="nav">
+      <a href="/methodologie">Méthodologie</a>
+      <a href="/tarifs">Tarifs</a>
+      {% if settings.enable_public_benchmark %}<a href="/barometre">Baromètre</a>{% endif %}
+      <a href="/acces">Accès rapport</a>
+      <a class="btn btn-primary btn-sm" href="/diagnostic">Diagnostic gratuit</a>
+    </nav>
+  </div>
+</header>
+
+{% block body %}{% endblock %}
+
+<footer class="footer no-print">
+  <div class="wrap footer-grid">
+    <div>
+      <a class="brand" href="/"><span class="brand-mark">DM</span> {{ settings.brand_name }}</a>
+      <p class="small muted mt-2">{{ settings.brand_tagline }}<br>
+      Grille de référence : Limpida Consulting 2024 — {{ criteria_count }} critères, 7 dimensions, {{ max_total_score }} points.</p>
+    </div>
+    <div>
+      <h4>Produit</h4>
+      <ul>
+        <li><a href="/diagnostic">Diagnostic gratuit</a></li>
+        <li><a href="/tarifs">Tarifs et offres</a></li>
+        <li><a href="/methodologie">Méthodologie</a></li>
+        {% if settings.enable_public_benchmark %}<li><a href="/barometre">Baromètre régional</a></li>{% endif %}
+        <li><a href="/api/docs">API pour intégrateurs</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Contact</h4>
+      <ul>
+        <li>{{ settings.brand_owner }}</li>
+        <li><a href="mailto:{{ settings.contact_email }}">{{ settings.contact_email }}</a></li>
+        <li><a href="{{ settings.whatsapp_url }}">{{ settings.contact_phone }}</a></li>
+        <li><a href="/mentions-legales">Mentions légales</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="wrap footer-bottom">
+    <span>© {{ current_year }} {{ settings.brand_owner }} — Tous droits réservés.</span>
+    <span>Vos données ne sont ni revendues ni cédées à des tiers.</span>
+  </div>
+</footer>
+</body>
+</html>

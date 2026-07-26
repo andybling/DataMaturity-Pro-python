@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Instructions de paiement — {{ order.reference }}{% endblock %}
+{% block body %}
+<section class="section">
+  <div class="wrap-narrow">
+    <span class="badge badge-warn">En attente de règlement</span>
+    <h1 class="mt-2">Instructions de paiement</h1>
+    <p class="muted">Votre commande est enregistrée. L'accès au rapport est activé dès validation du règlement.</p>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table class="compact">
+          <tbody>
+            <tr><th>Référence de commande</th><td><code>{{ order.reference }}</code></td></tr>
+            <tr><th>Offre</th><td>{{ plan.name if plan else order.plan_code }}</td></tr>
+            <tr><th>Montant</th><td><strong>{{ order.amount_minor | money(order.currency) }}</strong></td></tr>
+            <tr><th>Organisation</th><td>{{ assessment.company_name }}</td></tr>
+            <tr><th>Code d'accès au rapport</th><td><code>{{ order.access_code }}</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="mt-3">Comment procéder</h3>
+      <ol>
+        <li>Effectuez le règlement de <strong>{{ order.amount_minor | money(order.currency) }}</strong>
+          par virement bancaire, dépôt Mobile Money ou sur facture.</li>
+        <li>Envoyez la preuve de paiement en précisant la référence
+          <code>{{ order.reference }}</code> à
+          <a href="mailto:{{ settings.contact_email }}?subject=Paiement%20{{ order.reference }}">{{ settings.contact_email }}</a>
+          ou par <a href="{{ settings.whatsapp_url }}">WhatsApp au {{ settings.contact_phone }}</a>.</li>
+        <li>Dès validation, votre rapport devient accessible avec le code
+          <code>{{ order.access_code }}</code> depuis la page <a href="/acces">Accès rapport</a>.</li>
+      </ol>
+      <p class="small muted mb-0">Les coordonnées bancaires et le numéro Mobile Money vous sont
+        communiqués par retour de message, ainsi que la facture si vous en avez besoin pour
+        votre service comptable.</p>
+    </div>
+
+    <div class="hero-actions">
+      <a class="btn btn-ghost" href="/resultats/{{ assessment.public_id }}">Revenir à mes résultats</a>
+      <a class="btn btn-primary" href="{{ settings.whatsapp_url }}">Envoyer ma preuve de paiement</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

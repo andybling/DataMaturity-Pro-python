@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Paiement confirmé' if paid else 'Paiement en attente' }}{% endblock %}
+{% block body %}
+<section class="section">
+  <div class="wrap-narrow center">
+    {% if paid %}
+      <span class="badge badge-ok badge-lg">Paiement confirmé</span>
+      <h1 class="mt-2">Merci, votre rapport est débloqué</h1>
+      <p class="muted">Commande <code>{{ order.reference }}</code> —
+        {{ order.amount_minor | money(order.currency) }} réglés.</p>
+      <div class="card mt-3">
+        <p class="mb-2">Conservez votre code d'accès : <strong><code>{{ order.access_code }}</code></strong></p>
+        <p class="small muted mb-0">Il permet de retrouver le rapport depuis n'importe quel appareil
+          via la page <a href="/acces">Accès rapport</a>.</p>
+      </div>
+      <div class="hero-actions" style="justify-content:center">
+        <a class="btn btn-primary" href="/resultats/{{ assessment.public_id }}/rapport{% if report_token %}?jeton={{ report_token }}{% endif %}">Ouvrir mon rapport</a>
+        <a class="btn btn-ghost" href="/resultats/{{ assessment.public_id }}/rapport.pdf">Télécharger le PDF</a>
+      </div>
+    {% elif cancelled is defined and cancelled %}
+      <span class="badge badge-muted badge-lg">Paiement annulé</span>
+      <h1 class="mt-2">Votre commande a été annulée</h1>
+      <p class="muted">Aucun montant n'a été débité. Vos résultats gratuits restent accessibles.</p>
+      <div class="hero-actions" style="justify-content:center">
+        <a class="btn btn-primary" href="/resultats/{{ assessment.public_id }}">Revenir à mes résultats</a>
+      </div>
+    {% else %}
+      <span class="badge badge-warn badge-lg">Paiement en cours de vérification</span>
+      <h1 class="mt-2">Nous confirmons votre règlement</h1>
+      <p class="muted">La confirmation de l'opérateur peut prendre quelques instants.
+        Rechargez cette page dans une minute, ou utilisez votre code d'accès une fois le paiement validé.</p>
+      <div class="card mt-3">
+        <p class="mb-0">Référence : <code>{{ order.reference }}</code><br>
+          Code d'accès : <strong><code>{{ order.access_code }}</code></strong></p>
+      </div>
+      <div class="hero-actions" style="justify-content:center">
+        <a class="btn btn-ghost" href="/paiement/{{ order.public_id }}/retour">Actualiser</a>
+        <a class="btn btn-primary" href="{{ settings.whatsapp_url }}">Contacter le support</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Connexion — {{ settings.brand_name }}</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+<div class="login-shell">
+  <div class="card login-card">
+    <a class="brand" href="/"><span class="brand-mark">DM</span> {{ settings.brand_name }}</a>
+    <h1 style="font-size:1.4rem" class="mt-3">Console de pilotage</h1>
+    <p class="small muted">Accès réservé à l'administration de la plateforme.</p>
+    {% if errors %}
+      <div class="alert alert-error">{% for e in errors %}{{ e }}{% endfor %}</div>
+    {% endif %}
+    <form method="post" action="/admin/connexion">
+      <div class="field">
+        <label for="username">Identifiant</label>
+        <input type="text" id="username" name="username" required autocomplete="username" autofocus>
+      </div>
+      <div class="field">
+        <label for="password">Mot de passe</label>
+        <input type="password" id="password" name="password" required autocomplete="current-password">
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">Se connecter</button>
+    </form>
+  </div>
+</div>
+</body>
+</html>

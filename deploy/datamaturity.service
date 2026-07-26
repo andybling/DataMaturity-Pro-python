@@ -1,0 +1,26 @@
+# Service systemd pour un déploiement sans Docker (VPS Ubuntu ou Debian).
+# Installation :
+#   sudo cp deploy/datamaturity.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now datamaturity
+
+[Unit]
+Description=DataMaturity Pro — plateforme de diagnostic de maturite data
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=datamaturity
+Group=datamaturity
+WorkingDirectory=/opt/datamaturity
+EnvironmentFile=/opt/datamaturity/.env
+ExecStart=/opt/datamaturity/.venv/bin/uvicorn app.main:app \
+    --host 127.0.0.1 --port 8000 --workers 3 \
+    --proxy-headers --forwarded-allow-ips "*"
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target

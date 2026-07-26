@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}{{ dimension.name }} — {{ settings.brand_name }}{% endblock %}
+{% block body %}
+<section class="section">
+  <div class="wrap">
+    <div class="progress-head">
+      <div>
+        <span class="badge">Section {{ step }} sur {{ total_steps }}</span>
+        <h1 class="mt-2 mb-0">{{ dimension.name }}</h1>
+        <p class="muted mb-0">{{ dimension.criteria | length }} critères ·
+          poids stratégique {{ dimension.weight }} · {{ dimension.max_score }} points maximum</p>
+      </div>
+      <div class="right">
+        <strong>{{ progress.answered }}/{{ progress.total }}</strong>
+        <div class="small muted">critères renseignés</div>
+      </div>
+    </div>
+    <div class="progress"><i style="width: {{ progress.percentage }}%"></i></div>
+    <div class="steps">
+      {% for d in dimensions %}
+        {% if loop.index == step %}
+          <span class="on">{{ loop.index }}. {{ d.short_name }}</span>
+        {% else %}
+          <a href="/diagnostic/{{ assessment.public_id }}/{{ loop.index }}"
+             class="{{ 'done' if answers and d.criteria | map(attribute='code') | select('in', answers) | list | length == d.criteria | length else '' }}">{{ loop.index }}. {{ d.short_name }}</a>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    {% if errors %}
+      <div class="alert alert-error mt-3">{% for e in errors %}{{ e }}{% endfor %}
+        Les critères concernés sont encadrés en rouge ci-dessous.</div>
+    {% endif %}
+
+    <form method="post" action="/diagnostic/{{ assessment.public_id }}/{{ step }}" class="mt-3">
+      {% for criterion in dimension.criteria %}
+        <div class="criterion {{ 'missing' if missing and criterion.code in missing else '' }}">
+          <div class="criterion-head">
+            <h3>{{ loop.index }}. {{ criterion.name }}</h3>
+            <span class="badge {{ 'badge-danger' if criterion.weight == 3 else ('badge-info' if criterion.weight == 2 else 'badge-muted') }}">
+              {{ {1: 'Pas important', 2: 'Important', 3: 'Très important'}[criterion.weight] }}
+            </span>
+          </div>
+          <div class="options">
+            {% for label in criterion.levels %}
+              <label class="option">
+                <input type="radio" name="{{ criterion.code }}" value="{{ loop.index0 }}"
+                       {{ 'checked' if answers.get(criterion.code) is not none and answers.get(criterion.code) == loop.index0 else '' }}>
+                <span class="option-level">{{ loop.index0 }}</span>
+                <span>{{ label }}</span>
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+
+      <div class="form-nav">
+        {% if step > 1 %}
+          <button class="btn btn-ghost" type="submit" name="direction" value="previous">← Section précédente</button>
+        {% else %}
+          <a class="btn btn-ghost" href="/diagnostic">← Modifier mes informations</a>
+        {% endif %}
+        <button class="btn btn-primary" type="submit" name="direction" value="next">
+          {% if step < total_steps %}Section suivante →{% else %}Obtenir mes résultats →{% endif %}
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

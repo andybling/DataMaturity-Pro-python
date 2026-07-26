@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Pilotage — {{ settings.brand_name }}{% endblock %}</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+<div class="admin-shell">
+  <aside class="admin-side no-print">
+    <a class="brand" href="/admin"><span class="brand-mark">DM</span> Pilotage</a>
+    <nav>
+      <a href="/admin" class="{{ 'on' if active == 'dashboard' else '' }}">Tableau de bord</a>
+      <a href="/admin/prospects" class="{{ 'on' if active == 'leads' else '' }}">Prospects</a>
+      <a href="/admin/commandes" class="{{ 'on' if active == 'orders' else '' }}">Commandes</a>
+      <a href="/admin/tarification" class="{{ 'on' if active == 'pricing' else '' }}">Tarification</a>
+      <a href="/admin/barometre" class="{{ 'on' if active == 'barometer' else '' }}">Baromètre</a>
+      <a href="/admin/journal" class="{{ 'on' if active == 'audit' else '' }}">Journal</a>
+      <a href="/admin/compte" class="{{ 'on' if active == 'account' else '' }}">Mon compte</a>
+    </nav>
+    <div class="side-foot">
+      Connecté : <strong style="color:#fff">{{ admin }}</strong><br>
+      <a href="/" style="color:#94a3b8">Voir le site public</a><br>
+      <a href="/admin/deconnexion" style="color:#94a3b8">Se déconnecter</a>
+    </div>
+  </aside>
+  <main class="admin-main">
+    {% block body %}{% endblock %}
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Démarrer le diagnostic — {{ settings.brand_name }}{% endblock %}
+{% block body %}
+<section class="section">
+  <div class="wrap-narrow">
+    <span class="badge">Étape 1 sur 8</span>
+    <h1 class="mt-2">Votre organisation</h1>
+    <p class="muted">Ces informations servent à contextualiser l'analyse et à vous situer par rapport
+      à votre secteur. Elles ne sont ni revendues ni cédées à des tiers.</p>
+
+    {% if errors %}
+      <div class="alert alert-error"><strong>Merci de corriger :</strong>
+        <ul>{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul></div>
+    {% endif %}
+
+    <form method="post" action="/diagnostic" class="card">
+      <div class="form-row">
+        <div class="field">
+          <label for="company_name">Nom de l'organisation *</label>
+          <input type="text" id="company_name" name="company_name" required
+                 value="{{ (form.company_name if form else '') or '' }}" placeholder="Ex. Groupe Atlantique SA">
+        </div>
+        <div class="field">
+          <label for="sector">Secteur d'activité *</label>
+          <select id="sector" name="sector" required>
+            {% for s in sectors %}<option value="{{ s }}" {{ 'selected' if form and form.sector == s else '' }}>{{ s }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label for="country">Pays *</label>
+          <select id="country" name="country" required>
+            {% for c in countries %}<option value="{{ c }}" {{ 'selected' if form and form.country == c else '' }}>{{ c }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="field">
+          <label for="company_size">Effectif *</label>
+          <select id="company_size" name="company_size" required>
+            {% for s in sizes %}<option value="{{ s.code }}" {{ 'selected' if form and form.company_size == s.code else '' }}>{{ s.label }}</option>{% endfor %}
+          </select>
+          <div class="hint">Sert de base à l'estimation de la valeur en jeu.</div>
+        </div>
+      </div>
+      <div class="field">
+        <label for="annual_revenue_band">Chiffre d'affaires annuel</label>
+        <select id="annual_revenue_band" name="annual_revenue_band">
+          <option value="">Non communiqué</option>
+          {% for b in revenue_bands %}<option value="{{ b }}" {{ 'selected' if form and form.annual_revenue_band == b else '' }}>{{ b }}</option>{% endfor %}
+        </select>
+      </div>
+
+      <hr style="border:0;border-top:1px solid var(--line);margin:22px 0">
+      <h3>Vos coordonnées</h3>
+      <div class="form-row">
+        <div class="field">
+          <label for="contact_name">Nom et prénom *</label>
+          <input type="text" id="contact_name" name="contact_name" required value="{{ (form.contact_name if form else '') or '' }}">
+        </div>
+        <div class="field">
+          <label for="contact_role">Fonction</label>
+          <input type="text" id="contact_role" name="contact_role" value="{{ (form.contact_role if form else '') or '' }}" placeholder="Ex. Directeur des systèmes d'information">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label for="contact_email">Email professionnel *</label>
+          <input type="email" id="contact_email" name="contact_email" required value="{{ (form.contact_email if form else '') or '' }}">
+          <div class="hint">Utilisé pour vous renvoyer l'accès à vos résultats.</div>
+        </div>
+        <div class="field">
+          <label for="contact_phone">Téléphone / WhatsApp</label>
+          <input type="tel" id="contact_phone" name="contact_phone" value="{{ (form.contact_phone if form else '') or '' }}" placeholder="+225 ...">
+        </div>
+      </div>
+      <div class="field">
+        <label for="acquisition_channel">Comment avez-vous connu {{ settings.brand_name }} ?</label>
+        <select id="acquisition_channel" name="acquisition_channel">
+          <option value="">Non précisé</option>
+          {% for c in channels %}<option value="{{ c }}" {{ 'selected' if form and form.acquisition_channel == c else '' }}>{{ c }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label class="checkbox">
+          <input type="checkbox" name="consent" value="1" required>
+          <span>J'accepte que ces informations professionnelles soient conservées pour produire mon
+            diagnostic et me recontacter à ce sujet. Conformément à la loi ivoirienne n°2013-450 du
+            19 juin 2013 et au RGPD, je peux demander leur suppression à
+            <a href="mailto:{{ settings.contact_email }}">{{ settings.contact_email }}</a>.</span>
+        </label>
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">Commencer le questionnaire</button>
+      <p class="small muted center mt-2 mb-0">{{ criteria_count }} questions · environ 10 minutes · résultat immédiat</p>
+    </form>
+  </div>
+</section>
+{% endblock %}

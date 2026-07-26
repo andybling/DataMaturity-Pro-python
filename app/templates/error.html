@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Erreur {{ code }} — {{ settings.brand_name }}{% endblock %}
+{% block body %}
+<section class="section">
+  <div class="wrap-narrow center">
+    <div class="badge badge-danger badge-lg">Erreur {{ code }}</div>
+    <h1 class="mt-2">
+      {% if code == 404 %}Cette page n'existe pas
+      {% elif code == 403 %}Accès non autorisé
+      {% else %}Une erreur est survenue{% endif %}
+    </h1>
+    <p class="muted">{{ message or "Nous n'avons pas pu traiter votre demande." }}</p>
+    <div class="hero-actions center" style="justify-content:center">
+      <a class="btn btn-primary" href="/">Retour à l'accueil</a>
+      <a class="btn btn-ghost" href="/diagnostic">Lancer un diagnostic</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,6 @@
+<div class="currency-switch" role="group" aria-label="Choix de la devise">
+  {% for code in supported_currencies %}
+    <a href="?devise={{ code }}" class="{{ 'on' if code == currency else '' }}"
+       title="{{ currencies[code].name }}">{{ currencies[code].symbol }} {{ code }}</a>
+  {% endfor %}
+</div>

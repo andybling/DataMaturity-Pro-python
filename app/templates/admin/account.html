@@ -1,0 +1,53 @@
+{% extends "admin/base.html" %}
+{% block body %}
+<div class="admin-head">
+  <div>
+    <h1>Mon compte</h1>
+    <p class="muted mb-0">Sécurité de l'accès et configuration effective de l'instance.</p>
+  </div>
+</div>
+
+{% if request.query_params.get('ok') %}
+  <div class="alert alert-ok">Mot de passe modifié.</div>
+{% endif %}
+{% if errors %}
+  <div class="alert alert-error"><ul>{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul></div>
+{% endif %}
+
+<div class="grid grid-2">
+  <div class="card">
+    <h3>Changer mon mot de passe</h3>
+    <form method="post" action="/admin/compte/mot-de-passe">
+      <div class="field">
+        <label for="current_password">Mot de passe actuel</label>
+        <input type="password" id="current_password" name="current_password" required autocomplete="current-password">
+      </div>
+      <div class="field">
+        <label for="new_password">Nouveau mot de passe</label>
+        <input type="password" id="new_password" name="new_password" required minlength="10" autocomplete="new-password">
+        <div class="hint">10 caractères minimum.</div>
+      </div>
+      <div class="field">
+        <label for="confirm_password">Confirmation</label>
+        <input type="password" id="confirm_password" name="confirm_password" required autocomplete="new-password">
+      </div>
+      <button class="btn btn-primary" type="submit">Mettre à jour</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>Configuration de l'instance</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <tbody>
+          {% for key, value in config.items() %}
+            <tr><th>{{ key | replace('_', ' ') | capitalize }}</th><td>{{ value }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="small muted mt-2 mb-0">Ces valeurs proviennent des variables d'environnement.
+      Pour les modifier, éditer le fichier <code>.env</code> puis redémarrer le service.</p>
+  </div>
+</div>
+{% endblock %}

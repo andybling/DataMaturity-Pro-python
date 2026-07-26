@@ -1,0 +1,62 @@
+{% extends "admin/base.html" %}
+{% block body %}
+<div class="admin-head">
+  <div>
+    <h1>Baromètre interne</h1>
+    <p class="muted mb-0">Toutes les données agrégées, y compris les segments non publiables
+      publiquement (échantillon inférieur à {{ settings.min_benchmark_sample }}).</p>
+  </div>
+  {% if settings.enable_public_benchmark %}
+    <a class="btn btn-ghost btn-sm" href="/barometre">Voir la version publique</a>
+  {% endif %}
+</div>
+
+<div class="grid grid-4">
+  <div class="kpi kpi-brand"><span>Diagnostics agrégés</span><strong>{{ overall.sample }}</strong></div>
+  <div class="kpi kpi-brand"><span>Moyenne</span><strong>{{ overall.average | percent }}</strong></div>
+  <div class="kpi"><span>Médiane</span><strong>{{ overall.median | percent }}</strong></div>
+  <div class="kpi"><span>Amplitude</span><strong>{{ overall.worst | percent }} – {{ overall.best | percent }}</strong></div>
+</div>
+
+<div class="card mt-3">
+  <h3>Moyenne par dimension</h3>
+  {% for dim in dimensions %}
+    {% set value = overall.dimension_averages.get(dim.code, 0) %}
+    <div class="dimension-row">
+      <span class="dimension-name">{{ dim.name }} <span class="badge badge-muted">poids {{ dim.weight }}</span></span>
+      <span class="dimension-value">{{ value | percent }}</span>
+      <span class="bar"><i style="width:{{ value }}%;background:{{ dim.color }}"></i></span>
+    </div>
+  {% endfor %}
+  <p class="small muted mt-2 mb-0">Ces moyennes constituent la matière première d'une publication
+    de type « Baromètre de la maturité data en Afrique de l'Ouest ».</p>
+</div>
+
+{% for title, segments in [('Par secteur', sectors), ('Par pays', countries), ('Par taille', sizes)] %}
+  <div class="card mt-3">
+    <h3>{{ title }}</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <thead><tr><th>Segment</th><th class="num">Échantillon</th><th class="num">Moyenne</th>
+          <th class="num">Médiane</th><th class="num">Min</th><th class="num">Max</th><th>Publiable</th></tr></thead>
+        <tbody>
+          {% for seg in segments %}
+            <tr>
+              <td>{{ seg.label }}</td>
+              <td class="num">{{ seg.sample }}</td>
+              <td class="num"><strong>{{ seg.average | percent }}</strong></td>
+              <td class="num">{{ seg.median | percent }}</td>
+              <td class="num">{{ seg.worst | percent }}</td>
+              <td class="num">{{ seg.best | percent }}</td>
+              <td>{% if seg.is_publishable %}<span class="badge badge-ok">oui</span>
+                  {% else %}<span class="badge badge-warn">échantillon insuffisant</span>{% endif %}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="7" class="muted">Aucune donnée.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endfor %}
+{% endblock %}

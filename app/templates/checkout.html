@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Paiement — {{ plan.name }}{% endblock %}
+{% block body %}
+<section class="section">
+  <div class="wrap-narrow">
+    <a class="small muted" href="/resultats/{{ assessment.public_id }}">← Retour à mes résultats</a>
+    <h1 class="mt-2">Commander : {{ plan.name }}</h1>
+    <p class="muted">{{ plan.tagline }}</p>
+
+    {% if errors %}
+      <div class="alert alert-error">{% for e in errors %}{{ e }}{% endfor %}
+        Vous pouvez aussi régler par virement ou facture en choisissant l'option correspondante.</div>
+    {% endif %}
+
+    <div class="card">
+      <div class="progress-head">
+        <div>
+          <strong>{{ assessment.company_name }}</strong>
+          <div class="small muted">{{ assessment.sector }} · {{ assessment.country }} ·
+            score {{ assessment.percentage | percent(1) }}</div>
+        </div>
+        <div class="right">
+          <div class="plan-price">{{ price.formatted }}</div>
+          <div class="small muted">TTC, paiement unique</div>
+        </div>
+      </div>
+
+      <form method="post" action="/paiement/{{ assessment.public_id }}/{{ plan.code }}" class="mt-3">
+        <div class="field">
+          <label for="currency">Devise de règlement</label>
+          <select id="currency" name="currency" onchange="window.location='?devise='+this.value">
+            {% for code in supported_currencies %}
+              <option value="{{ code }}" {{ 'selected' if code == currency else '' }}>
+                {{ currencies[code].name }} ({{ code }})</option>
+            {% endfor %}
+          </select>
+          <div class="hint">Le franc CFA passe par Mobile Money, l'euro et le dollar par carte bancaire.</div>
+        </div>
+
+        <div class="field">
+          <label>Moyen de paiement</label>
+          <div class="options">
+            {% for provider in providers %}
+              <label class="option">
+                <input type="radio" name="provider" value="{{ provider.code }}" {{ 'checked' if loop.first else '' }}>
+                <span class="option-level">{{ loop.index }}</span>
+                <span><strong>{{ provider.label }}</strong></span>
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <ul class="plan" style="border:0;padding:0;box-shadow:none;display:block">
+          {% for feature in plan.features %}<li>{{ feature }}</li>{% endfor %}
+        </ul>
+
+        <button class="btn btn-primary btn-block" type="submit">Payer {{ price.formatted }}</button>
+        <p class="small muted center mt-2 mb-0">Vous recevrez un code d'accès permettant de retrouver
+          votre rapport à tout moment depuis la page <a href="/acces">Accès rapport</a>.</p>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

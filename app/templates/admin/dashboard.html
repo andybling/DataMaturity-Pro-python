@@ -1,0 +1,156 @@
+{% extends "admin/base.html" %}
+{% block body %}
+<div class="admin-head">
+  <div>
+    <h1>Tableau de bord</h1>
+    <p class="muted mb-0">Vue consolidée de l'activité et du chiffre d'affaires.</p>
+  </div>
+  <div class="hero-actions" style="margin:0">
+    <a class="btn btn-ghost btn-sm" href="/admin/prospects/export.xlsx">Export Excel</a>
+    <a class="btn btn-ghost btn-sm" href="/admin/prospects/export.csv">Export CSV</a>
+  </div>
+</div>
+
+<div class="grid grid-4">
+  <div class="kpi kpi-brand"><span>Diagnostics terminés</span><strong>{{ kpis.assessments_completed }}</strong>
+    <em>{{ kpis.assessments_total }} démarrés · {{ kpis.completion_rate | percent(1) }} d'achèvement</em></div>
+  <div class="kpi"><span>Sur 30 jours</span><strong>{{ kpis.assessments_30d }}</strong>
+    <em>nouveaux diagnostics</em></div>
+  <div class="kpi kpi-brand"><span>Chiffre d'affaires</span><strong>{{ kpis.revenue_label }}</strong>
+    <em>{{ kpis.revenue_30d_xof | xof }} sur 30 jours</em></div>
+  <div class="kpi"><span>Taux de conversion</span><strong>{{ kpis.conversion_rate | percent(1) }}</strong>
+    <em>{{ kpis.orders_paid }} commandes payées</em></div>
+</div>
+
+<div class="grid grid-4 mt-2">
+  <div class="kpi"><span>Score moyen</span><strong>{{ kpis.average_score | percent(1) }}</strong></div>
+  <div class="kpi"><span>Panier moyen</span><strong>{{ kpis.average_basket_label }}</strong></div>
+  <div class="kpi"><span>Commandes en attente</span><strong>{{ kpis.orders_pending }}</strong>
+    <em><a href="/admin/commandes?statut=pending">à valider</a></em></div>
+  <div class="kpi"><span>Commandes totales</span><strong>{{ kpis.orders_total }}</strong></div>
+</div>
+
+<div class="grid grid-2 mt-3">
+  <div class="card">
+    <h3>Diagnostics par mois</h3>
+    <div class="spark">
+      {% for bucket in kpis.monthly %}
+        <div title="{{ bucket.label }} : {{ bucket.assessments }} diagnostics">
+          <i style="height: {{ bucket.assessments_ratio }}%"></i></div>
+      {% endfor %}
+    </div>
+    <div class="spark-labels">{% for bucket in kpis.monthly %}<span>{{ bucket.label }}</span>{% endfor %}</div>
+  </div>
+  <div class="card">
+    <h3>Revenus par mois</h3>
+    <div class="spark">
+      {% for bucket in kpis.monthly %}
+        <div title="{{ bucket.label }} : {{ bucket.revenue_label }}">
+          <i style="height: {{ bucket.revenue_ratio }}%"></i></div>
+      {% endfor %}
+    </div>
+    <div class="spark-labels">{% for bucket in kpis.monthly %}<span>{{ bucket.label }}</span>{% endfor %}</div>
+  </div>
+</div>
+
+<div class="grid grid-2 mt-3">
+  <div class="card">
+    <h3>Revenus par devise d'encaissement</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <thead><tr><th>Devise</th><th class="num">Équivalent FCFA</th></tr></thead>
+        <tbody>
+          {% for code, amount in kpis.revenue_by_currency.items() %}
+            <tr><td>{{ currencies[code].name }} ({{ code }})</td><td class="num">{{ amount | xof }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <h3 class="mt-3">Revenus par offre</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <thead><tr><th>Offre</th><th class="num">Équivalent FCFA</th></tr></thead>
+        <tbody>
+          {% for code, amount in kpis.revenue_by_plan.items() %}
+            <tr><td>{{ code | capitalize }}</td><td class="num">{{ amount | xof }}</td></tr>
+          {% else %}
+            <tr><td colspan="2" class="muted">Aucune commande payée pour l'instant.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Secteurs les plus représentés</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <thead><tr><th>Secteur</th><th class="num">Diagnostics</th><th class="num">Score moyen</th></tr></thead>
+        <tbody>
+          {% for name, count, average in kpis.top_sectors %}
+            <tr><td>{{ name }}</td><td class="num">{{ count }}</td><td class="num">{{ average | percent }}</td></tr>
+          {% else %}
+            <tr><td colspan="3" class="muted">Aucun diagnostic terminé.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <h3 class="mt-3">Canaux d'acquisition</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <thead><tr><th>Canal</th><th class="num">Leads</th></tr></thead>
+        <tbody>
+          {% for name, count in kpis.top_channels %}
+            <tr><td>{{ name }}</td><td class="num">{{ count }}</td></tr>
+          {% else %}
+            <tr><td colspan="2" class="muted">Aucune donnée.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-2 mt-3">
+  <div class="card">
+    <h3>Derniers diagnostics</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <thead><tr><th>Organisation</th><th class="num">Score</th><th>Étape</th></tr></thead>
+        <tbody>
+          {% for row in recent %}
+            <tr>
+              <td><a href="/admin/prospects/{{ row.public_id }}">{{ row.company_name }}</a>
+                <div class="small muted">{{ row.created_at | datetime_fr }}</div></td>
+              <td class="num">{% if row.status == 'completed' %}{{ row.percentage | percent(1) }}{% else %}—{% endif %}</td>
+              <td><span class="badge badge-muted">{{ row.lead_stage }}</span></td>
+            </tr>
+          {% else %}
+            <tr><td colspan="3" class="muted">Aucun diagnostic enregistré.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Dernières commandes</h3>
+    <div class="table-wrap">
+      <table class="compact">
+        <thead><tr><th>Référence</th><th>Offre</th><th class="num">Montant</th><th>Statut</th></tr></thead>
+        <tbody>
+          {% for order in recent_orders %}
+            <tr>
+              <td><code class="small">{{ order.reference }}</code>
+                <div class="small muted">{{ order.assessment.company_name }}</div></td>
+              <td>{{ order.plan_code }}</td>
+              <td class="num">{{ order.amount_minor | money(order.currency) }}</td>
+              <td><span class="badge {{ 'badge-ok' if order.status == 'paid' else ('badge-warn' if order.status == 'pending' else 'badge-muted') }}">{{ order.status }}</span></td>
+            </tr>
+          {% else %}
+            <tr><td colspan="4" class="muted">Aucune commande.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

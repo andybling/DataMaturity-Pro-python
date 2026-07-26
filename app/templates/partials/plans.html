@@ -1,0 +1,29 @@
+<div class="plans">
+  {% for view in plans %}
+    <div class="plan {{ 'plan-featured' if view.plan.highlight else '' }}"
+         {% if view.plan.badge %}data-badge="{{ view.plan.badge }}"{% endif %}>
+      <h3>{{ view.plan.name }}</h3>
+      <div class="plan-tagline">{{ view.plan.tagline }}</div>
+      <div class="plan-price">{{ view.price_label }}</div>
+      <div class="plan-alt">
+        {% if view.secondary_prices %}soit {{ view.secondary_prices | join(' · ') }}
+        {% elif view.plan.quote_only %}Licence annuelle, périmètre à définir
+        {% else %}Aucun paiement requis{% endif %}
+      </div>
+      <ul>
+        {% for feature in view.plan.features %}<li>{{ feature }}</li>{% endfor %}
+        {% for feature in view.plan.excluded %}<li class="off">{{ feature }}</li>{% endfor %}
+      </ul>
+      {% if view.plan.code == 'free' %}
+        <a class="btn btn-primary btn-block" href="/diagnostic">{{ view.plan.cta }}</a>
+      {% elif view.plan.quote_only %}
+        <a class="btn btn-ghost btn-block" href="mailto:{{ settings.contact_email }}?subject=Licence%20Entreprise%20{{ settings.brand_name }}">{{ view.plan.cta }}</a>
+      {% elif assessment is defined and assessment %}
+        <a class="btn {{ 'btn-primary' if view.plan.highlight else 'btn-ghost' }} btn-block"
+           href="/paiement/{{ assessment.public_id }}/{{ view.plan.code }}?devise={{ currency }}">{{ view.plan.cta }}</a>
+      {% else %}
+        <a class="btn {{ 'btn-primary' if view.plan.highlight else 'btn-ghost' }} btn-block" href="/diagnostic">Commencer par le diagnostic</a>
+      {% endif %}
+    </div>
+  {% endfor %}
+</div>

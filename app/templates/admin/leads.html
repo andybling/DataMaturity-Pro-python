@@ -1,0 +1,86 @@
+{% extends "admin/base.html" %}
+{% block body %}
+<div class="admin-head">
+  <div>
+    <h1>Prospects</h1>
+    <p class="muted mb-0">{{ rows | length }} évaluation(s) correspondant aux filtres.</p>
+  </div>
+  <div class="hero-actions" style="margin:0">
+    <a class="btn btn-ghost btn-sm" href="/admin/prospects/export.xlsx?{{ query_string }}">Export Excel</a>
+    <a class="btn btn-ghost btn-sm" href="/admin/prospects/export.csv?{{ query_string }}">Export CSV</a>
+  </div>
+</div>
+
+<form method="get" action="/admin/prospects" class="filters card card-flat">
+  <div class="field">
+    <label for="q">Recherche</label>
+    <input type="text" id="q" name="q" value="{{ filters.get('q', '') }}" placeholder="Organisation, contact, email">
+  </div>
+  <div class="field">
+    <label for="secteur">Secteur</label>
+    <select id="secteur" name="secteur">
+      <option value="">Tous</option>
+      {% for s in sectors %}<option value="{{ s }}" {{ 'selected' if filters.get('secteur') == s else '' }}>{{ s }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="pays">Pays</label>
+    <select id="pays" name="pays">
+      <option value="">Tous</option>
+      {% for c in countries %}<option value="{{ c }}" {{ 'selected' if filters.get('pays') == c else '' }}>{{ c }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="niveau">Niveau</label>
+    <select id="niveau" name="niveau">
+      <option value="">Tous</option>
+      {% for lvl in levels %}<option value="{{ lvl.code }}" {{ 'selected' if filters.get('niveau') == lvl.code else '' }}>{{ lvl.name }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="etape">Étape</label>
+    <select id="etape" name="etape">
+      <option value="">Toutes</option>
+      {% for stage in stages %}<option value="{{ stage }}" {{ 'selected' if filters.get('etape') == stage else '' }}>{{ stage }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="payes">Payés</label>
+    <select id="payes" name="payes">
+      <option value="">Tous</option>
+      <option value="1" {{ 'selected' if filters.get('payes') == '1' else '' }}>Clients payants</option>
+    </select>
+  </div>
+  <button class="btn btn-primary btn-sm" type="submit">Filtrer</button>
+  <a class="btn btn-ghost btn-sm" href="/admin/prospects">Réinitialiser</a>
+</form>
+
+<div class="table-wrap mt-2">
+  <table>
+    <thead>
+      <tr><th>Organisation</th><th>Contact</th><th>Secteur / Pays</th><th class="num">Score</th>
+        <th>Niveau</th><th>Étape</th><th>Statut</th><th>Date</th></tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+        <tr>
+          <td><a href="/admin/prospects/{{ row.public_id }}"><strong>{{ row.company_name }}</strong></a>
+            {% if row.is_unlocked %}<span class="badge badge-ok">payé</span>{% endif %}
+            <div class="small muted">{{ row.company_size }}</div></td>
+          <td>{{ row.contact_name }}
+            <div class="small muted">{{ row.contact_email }}{% if row.contact_phone %}<br>{{ row.contact_phone }}{% endif %}</div></td>
+          <td>{{ row.sector }}<div class="small muted">{{ row.country }}</div></td>
+          <td class="num">{% if row.status == 'completed' %}<strong>{{ row.percentage | percent(1) }}</strong>
+            <div class="small muted">{{ row.total_score }}/{{ row.max_score }}</div>{% else %}—{% endif %}</td>
+          <td>{% if row.level_code %}<span class="badge level-{{ row.level_code }}">{{ row.level_code | capitalize }}</span>{% else %}—{% endif %}</td>
+          <td><span class="badge badge-muted">{{ row.lead_stage }}</span></td>
+          <td><span class="badge {{ 'badge-ok' if row.status == 'completed' else 'badge-warn' }}">{{ row.status }}</span></td>
+          <td class="small nowrap">{{ row.created_at | date_fr }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="8" class="muted">Aucun résultat pour ces filtres.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

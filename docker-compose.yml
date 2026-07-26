@@ -1,0 +1,36 @@
+# Pile complète : application + PostgreSQL.
+# Démarrage : cp .env.example .env  puis  docker compose up -d --build
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: datamaturity
+      POSTGRES_USER: datamaturity
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changez-ce-mot-de-passe}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U datamaturity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://datamaturity:${POSTGRES_PASSWORD:-changez-ce-mot-de-passe}@db:5432/datamaturity
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - appdata:/app/data
+
+volumes:
+  pgdata:
+  appdata:

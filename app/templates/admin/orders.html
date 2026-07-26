@@ -1,0 +1,63 @@
+{% extends "admin/base.html" %}
+{% block body %}
+<div class="admin-head">
+  <div>
+    <h1>Commandes</h1>
+    <p class="muted mb-0">{{ rows | length }} commande(s) ·
+      encaissé {{ totals.paid | xof }} · en attente {{ totals.pending | xof }}</p>
+  </div>
+  <form method="get" action="/admin/commandes" class="filters" style="margin:0">
+    <div class="field">
+      <label for="statut">Statut</label>
+      <select id="statut" name="statut" onchange="this.form.submit()">
+        <option value="">Tous</option>
+        {% for status in ['pending', 'paid', 'cancelled', 'failed', 'refunded'] %}
+          <option value="{{ status }}" {{ 'selected' if filters.get('statut') == status else '' }}>{{ status }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </form>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Référence</th><th>Organisation</th><th>Offre</th><th class="num">Montant</th>
+        <th>Moyen</th><th>Statut</th><th>Code d'accès</th><th>Dates</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for order in rows %}
+        <tr>
+          <td><code class="small">{{ order.reference }}</code>
+            {% if order.provider_reference %}<div class="small muted">{{ order.provider_reference[:22] }}</div>{% endif %}</td>
+          <td><a href="/admin/prospects/{{ order.assessment.public_id }}">{{ order.assessment.company_name }}</a>
+            <div class="small muted">{{ order.customer_email }}</div></td>
+          <td>{{ order.plan_code }}</td>
+          <td class="num"><strong>{{ order.amount_minor | money(order.currency) }}</strong>
+            <div class="small muted">{{ order.amount_xof | xof }}</div></td>
+          <td>{{ order.provider }}</td>
+          <td><span class="badge {{ 'badge-ok' if order.status == 'paid' else ('badge-warn' if order.status == 'pending' else 'badge-muted') }}">{{ order.status }}</span></td>
+          <td><code class="small">{{ order.access_code }}</code></td>
+          <td class="small nowrap">créée {{ order.created_at | date_fr }}
+            {% if order.paid_at %}<br>payée {{ order.paid_at | date_fr }}{% endif %}</td>
+          <td>
+            {% if order.status == 'pending' %}
+              <form method="post" action="/admin/commandes/{{ order.reference }}/valider" style="display:inline">
+                <button class="btn btn-primary btn-sm" type="submit"
+                        onclick="return confirm('Confirmer la réception du paiement de {{ order.amount_minor | money(order.currency) }} ?')">Valider</button>
+              </form>
+              <form method="post" action="/admin/commandes/{{ order.reference }}/annuler" style="display:inline">
+                <button class="btn btn-danger btn-sm" type="submit">Annuler</button>
+              </form>
+            {% else %}<span class="small muted">—</span>{% endif %}
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="9" class="muted">Aucune commande enregistrée.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p class="small muted mt-2">La validation manuelle sert aux règlements par virement, dépôt Mobile Money
+  direct ou facture. Les paiements Stripe et CinetPay sont validés automatiquement par webhook.</p>
+{% endblock %}

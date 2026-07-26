@@ -1,0 +1,95 @@
+{% extends "admin/base.html" %}
+{% block body %}
+<div class="admin-head">
+  <div>
+    <h1>Tarification</h1>
+    <p class="muted mb-0">Tarifs de référence en FCFA, taux de change et prix forcés par devise.
+      Prise en compte immédiate, sans redéploiement.</p>
+  </div>
+</div>
+
+{% if request.query_params.get('ok') %}
+  <div class="alert alert-ok">Tarification enregistrée.</div>
+{% endif %}
+
+<form method="post" action="/admin/tarification">
+  <div class="card">
+    <h3>Tarifs de référence (FCFA)</h3>
+    <p class="small muted">Le franc CFA est la devise de référence : l'euro et le dollar sont calculés
+      par conversion puis arrondis à un prix commercial.</p>
+    <div class="grid grid-4">
+      {% for plan in plans %}
+        <div class="field">
+          <label for="price_{{ plan.code }}">{{ plan.name }}</label>
+          <input type="number" min="0" step="1000" id="price_{{ plan.code }}"
+                 name="price_{{ plan.code }}" value="{{ prices_xof.get(plan.code, 0) }}">
+          <div class="hint">{{ 'Sur devis' if plan.quote_only else ('Gratuit' if plan.price_xof == 0 else 'Payant') }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card mt-3">
+    <h3>Taux de change</h3>
+    <p class="small muted">Nombre de francs CFA pour une unité de devise. La parité EUR/XOF est fixe
+      (655,957) ; le dollar est à actualiser périodiquement.</p>
+    <div class="grid grid-3">
+      {% for code in supported_currencies %}
+        {% if code != 'XOF' %}
+          <div class="field">
+            <label for="fx_{{ code }}">1 {{ code }} = ? FCFA</label>
+            <input type="number" min="0.0001" step="0.001" id="fx_{{ code }}" name="fx_{{ code }}"
+                   value="{{ fx.get(code) }}">
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card mt-3">
+    <h3>Prix forcés par devise (facultatif)</h3>
+    <p class="small muted">Renseigner une valeur ici court-circuite la conversion automatique pour
+      cette offre et cette devise. Laisser vide pour revenir au calcul par taux de change.</p>
+    <div class="table-wrap">
+      <table class="compact">
+        <thead><tr><th>Offre</th>{% for code in supported_currencies %}<th>{{ code }}</th>{% endfor %}</tr></thead>
+        <tbody>
+          {% for plan in plans %}
+            <tr>
+              <td>{{ plan.name }}</td>
+              {% for code in supported_currencies %}
+                <td><input type="text" name="override_{{ plan.code }}_{{ code }}"
+                           value="{{ overrides.get(plan.code, {}).get(code, '') }}"
+                           placeholder="auto" style="max-width:120px"></td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="mt-3"><button class="btn btn-primary" type="submit">Enregistrer la tarification</button></div>
+</form>
+
+<div class="card mt-3">
+  <h3>Aperçu client</h3>
+  <p class="small muted">Prix tels qu'ils s'affichent actuellement sur le site public.</p>
+  <div class="table-wrap">
+    <table class="compact">
+      <thead><tr><th>Offre</th>{% for code in supported_currencies %}<th>{{ currencies[code].name }}</th>{% endfor %}</tr></thead>
+      <tbody>
+        {% for plan in plans %}
+          <tr>
+            <td><strong>{{ plan.name }}</strong></td>
+            {% for code in supported_currencies %}
+              {% set view = views[code] | selectattr('code', 'equalto', plan.code) | first %}
+              <td>{{ view.price_label }}</td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

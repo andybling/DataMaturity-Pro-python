@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Tarifs — {{ settings.brand_name }}{% endblock %}
+{% block body %}
+<section class="section">
+  <div class="wrap">
+    <div class="progress-head">
+      <div>
+        <h1 class="mb-0">Tarifs</h1>
+        <p class="muted">Le diagnostic est gratuit. Vous ne payez que si vous souhaitez le rapport détaillé.</p>
+      </div>
+      {% include "partials/currency_switch.html" %}
+    </div>
+    <div class="mt-3">{% include "partials/plans.html" %}</div>
+
+    <div class="card mt-4">
+      <h3>Moyens de paiement acceptés</h3>
+      <div class="grid grid-3 mt-2">
+        <div>
+          <strong>Mobile Money</strong>
+          <p class="small muted mb-0">Orange Money, MTN, Moov et Wave via CinetPay, en FCFA.</p>
+        </div>
+        <div>
+          <strong>Carte bancaire</strong>
+          <p class="small muted mb-0">Visa et Mastercard via Stripe, en euro ou en dollar.</p>
+        </div>
+        <div>
+          <strong>Virement et facture</strong>
+          <p class="small muted mb-0">Sur bon de commande, avec facture émise avant paiement.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-3">
+      <h3>Questions fréquentes</h3>
+      <p><strong>Pourquoi ce niveau de prix ?</strong> Une mission de conseil data pour une PME de la sous-région
+        se situe entre 500 000 et 2 000 000 FCFA. Le rapport Premium représente moins de 10 % de ce montant
+        tout en fournissant un diagnostic structuré et une feuille de route exploitable.</p>
+      <p><strong>Puis-je repasser le diagnostic plus tard ?</strong> Oui, et c'est recommandé : une réévaluation
+        à 6 ou 12 mois mesure objectivement la progression obtenue.</p>
+      <p class="mb-0"><strong>Mes données sont-elles confidentielles ?</strong> Les résultats individuels ne sont
+        jamais publiés. Seules des moyennes agrégées, calculées sur un minimum de
+        {{ settings.min_benchmark_sample }} organisations, alimentent le baromètre régional.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

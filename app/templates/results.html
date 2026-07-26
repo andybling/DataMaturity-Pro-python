@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Résultats — {{ assessment.company_name }}{% endblock %}
+{% block body %}
+<section class="section">
+  <div class="wrap">
+    <div class="score-hero">
+      <div>
+        <span class="badge">Diagnostic terminé</span>
+        <h1 class="mt-2 mb-0">{{ assessment.company_name }}</h1>
+        <p class="muted">{{ assessment.sector }} · {{ assessment.country }} ·
+          évalué le {{ assessment.completed_at | date_fr }}</p>
+        <div class="score-big">{{ score.percentage | percent(1) }}</div>
+        <p class="score-sub">{{ score.total_score }} points sur {{ score.max_score }} —
+          niveau <span class="badge badge-lg level-{{ score.level.code }}">{{ score.level.name }}</span></p>
+        <div class="hero-actions">
+          {% if unlocked %}
+            <a class="btn btn-primary" href="/resultats/{{ assessment.public_id }}/rapport">Ouvrir mon rapport détaillé</a>
+            <a class="btn btn-ghost" href="/resultats/{{ assessment.public_id }}/rapport.pdf">Télécharger le PDF</a>
+          {% else %}
+            <a class="btn btn-primary" href="#offres">Débloquer le rapport détaillé</a>
+            <a class="btn btn-ghost" href="/resultats/{{ assessment.public_id }}/grille.xlsx">Télécharger mes réponses (Excel)</a>
+          {% endif %}
+        </div>
+      </div>
+      <div>{{ radar_svg(score.dimensions | map(attribute='short_name') | list,
+                        score.dimensions | map(attribute='percentage') | list,
+                        color=score.level.color) | safe }}</div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="grid grid-2">
+      <div class="card">
+        <h2>Lecture de votre score</h2>
+        {% for para in summary.summary %}<p>{{ para }}</p>{% endfor %}
+      </div>
+      <div>
+        <div class="card mb-2">
+          <h3>Vos trois points forts</h3>
+          {% for item in summary.strengths %}
+            <div class="dimension-row">
+              <span class="dimension-name">{{ item.name }}</span>
+              <span class="dimension-value">{{ item.percentage | percent }}</span>
+              <span class="bar"><i style="width:{{ item.percentage }}%;background:{{ item.color }}"></i></span>
+            </div>
+          {% endfor %}
+        </div>
+        <div class="card">
+          <h3>Vos trois points de vigilance</h3>
+          {% for item in summary.watchpoints %}
+            <div class="dimension-row">
+              <span class="dimension-name">{{ item.name }}</span>
+              <span class="dimension-value">{{ item.percentage | percent }}</span>
+              <span class="bar"><i style="width:{{ item.percentage }}%;background:{{ item.color }}"></i></span>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <h2>Score par dimension</h2>
+    <div class="table-wrap mt-2">
+      <table>
+        <thead><tr><th>Dimension</th><th class="num">Poids</th><th class="num">Score</th>
+          <th class="num">Maximum</th><th class="num">Pourcentage</th><th>Niveau</th></tr></thead>
+        <tbody>
+          {% for dim in score.dimensions %}
+            <tr>
+              <td><strong>{{ dim.name }}</strong></td>
+              <td class="num">{{ dim.weight }}</td>
+              <td class="num">{{ dim.score }}</td>
+              <td class="num">{{ dim.max_score }}</td>
+              <td class="num">{{ dim.percentage | percent }}</td>
+              <td><span class="badge level-{{ dim.level.code }}">{{ dim.level.name }}</span></td>
+            </tr>
+          {% endfor %}
+          <tr>
+            <td><strong>Total</strong></td><td class="num">—</td>
+            <td class="num"><strong>{{ score.total_score }}</strong></td>
+            <td class="num"><strong>{{ score.max_score }}</strong></td>
+            <td class="num"><strong>{{ score.percentage | percent(1) }}</strong></td>
+            <td><span class="badge level-{{ score.level.code }}">{{ score.level.name }}</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+{% if not unlocked %}
+<section class="section section-tint" id="offres">
+  <div class="wrap">
+    <h2>Ce que contient le rapport détaillé</h2>
+    <p class="muted">Votre diagnostic identifie {{ summary.locked_recommendations }} actions
+      d'amélioration, dont {{ summary.locked_quick_wins }} à effort faible. Le détail,
+      la priorisation et la feuille de route constituent l'offre payante.</p>
+
+    <div class="locked mt-3">
+      <div class="locked-content">
+        <h3>Recommandations priorisées</h3>
+        <p><strong>1. Formaliser et faire approuver une politique de données</strong> — Gouvernance ·
+          priorité critique · effort moyen · indicateur : politique approuvée et taux d'acquittement.</p>
+        <p><strong>2. Industrialiser des contrôles qualité automatisés</strong> — Qualité ·
+          priorité critique · effort moyen · indicateur : part des flux critiques couverts.</p>
+        <p><strong>3. Mettre en place une gestion des accès basée sur les rôles</strong> — Sécurité ·
+          priorité élevée · effort moyen · indicateur : taux de comptes revus dans les délais.</p>
+        <p>Trimestre 1 — Sécuriser et cadrer · Trimestre 2 — Structurer et outiller ·
+          Trimestre 3 — Industrialiser · Trimestre 4 — Valoriser et pérenniser.</p>
+      </div>
+      <div class="locked-overlay">
+        <div class="inner">
+          <span class="badge badge-lg">Contenu réservé</span>
+          <h3 class="mt-2">{{ summary.locked_recommendations }} recommandations vous attendent</h3>
+          <p class="small muted">Analyse critère par critère, plan d'action priorisé,
+            feuille de route 12 mois et estimation de la valeur en jeu.</p>
+          <a class="btn btn-primary" href="#tarifs">Voir les offres</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="progress-head mt-4" id="tarifs">
+      <h2 class="mb-0">Débloquer votre rapport</h2>
+      {% include "partials/currency_switch.html" %}
+    </div>
+    <div class="mt-3">{% include "partials/plans.html" %}</div>
+    <p class="small muted mt-3">Un doute sur l'offre à retenir ?
+      Écrivez à <a href="mailto:{{ settings.contact_email }}">{{ settings.contact_email }}</a>
+      ou par <a href="{{ settings.whatsapp_url }}">WhatsApp</a> en précisant votre référence :
+      <code>{{ assessment.public_id[:12] }}</code>.</p>
+  </div>
+</section>
+{% else %}
+<section class="section section-tint">
+  <div class="wrap center">
+    <span class="badge badge-ok badge-lg">Offre {{ paid_plan | capitalize }} active</span>
+    <h2 class="mt-2">Votre rapport détaillé est disponible</h2>
+    <div class="hero-actions" style="justify-content:center">
+      <a class="btn btn-primary" href="/resultats/{{ assessment.public_id }}/rapport">Consulter le rapport</a>
+      <a class="btn btn-ghost" href="/resultats/{{ assessment.public_id }}/rapport.pdf">PDF</a>
+      <a class="btn btn-ghost" href="/resultats/{{ assessment.public_id }}/grille.xlsx">Excel</a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="section">
+  <div class="wrap-narrow center">
+    <p class="small muted">Conservez ce lien pour retrouver vos résultats :<br>
+      <code>{{ settings.base_url }}/resultats/{{ assessment.public_id }}</code></p>
+  </div>
+</section>
+{% endblock %}

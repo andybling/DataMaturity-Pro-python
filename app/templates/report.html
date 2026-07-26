@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% block title %}Rapport détaillé — {{ assessment.company_name }}{% endblock %}
+{% block body %}
+<section class="section">
+  <div class="wrap">
+    <div class="progress-head">
+      <div>
+        <span class="badge badge-ok">Rapport {{ 'Premium' if premium else 'Standard' }}</span>
+        <h1 class="mt-2 mb-0">Diagnostic de maturité data</h1>
+        <p class="muted mb-0">{{ assessment.company_name }} · {{ assessment.sector }} ·
+          {{ assessment.country }} · {{ assessment.completed_at | date_fr }}</p>
+      </div>
+      <div class="hero-actions no-print" style="margin:0">
+        <a class="btn btn-primary" href="/resultats/{{ assessment.public_id }}/rapport.pdf">Télécharger le PDF</a>
+        <a class="btn btn-ghost" href="/resultats/{{ assessment.public_id }}/grille.xlsx">Export Excel</a>
+        <button class="btn btn-ghost" onclick="window.print()">Imprimer</button>
+      </div>
+    </div>
+
+    <div class="grid grid-4 mt-3">
+      <div class="kpi kpi-brand"><span>Score global</span><strong>{{ score.total_score }}/{{ score.max_score }}</strong></div>
+      <div class="kpi kpi-brand"><span>Pourcentage</span><strong>{{ score.percentage | percent(1) }}</strong></div>
+      <div class="kpi"><span>Niveau</span><strong>{{ score.level.name }}</strong></div>
+      <div class="kpi"><span>Projection 12 mois</span><strong>{{ analysis.projected_percentage | percent }}</strong>
+        <em>si la feuille de route est appliquée</em></div>
+    </div>
+
+    <div class="report-section">
+      <h2>1. Synthèse pour la direction</h2>
+      <div class="grid grid-2">
+        <div>
+          <h3>{{ analysis.headline }}</h3>
+          {% for para in analysis.executive_summary %}<p>{{ para }}</p>{% endfor %}
+        </div>
+        <div>{{ radar_svg(score.dimensions | map(attribute='short_name') | list,
+                          score.dimensions | map(attribute='percentage') | list,
+                          color=score.level.color,
+                          comparison=(positioning.sector.dimension_averages.values() | list) if positioning and positioning.sector and positioning.sector.is_publishable else None) | safe }}
+          {% if positioning and positioning.sector and positioning.sector.is_publishable %}
+            <p class="small muted center">Trait plein : votre organisation · pointillés : moyenne du secteur</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="report-section">
+      <h2>2. Positionnement sectoriel</h2>
+      <p>{{ positioning.comment }}</p>
+      {% if positioning.sector and positioning.sector.is_publishable %}
+        <div class="grid grid-4">
+          <div class="kpi"><span>Moyenne du secteur</span><strong>{{ positioning.sector.average | percent }}</strong>
+            <em>{{ positioning.sector.sample }} organisations</em></div>
+          <div class="kpi"><span>Médiane du secteur</span><strong>{{ positioning.sector.median | percent }}</strong></div>
+          <div class="kpi"><span>Votre écart</span><strong>{{ '%+.0f' | format(positioning.delta_sector) }} pts</strong></div>
+          <div class="kpi"><span>Votre rang</span><strong>{{ positioning.percentile_sector if positioning.percentile_sector is not none else '—' }}<sup>e</sup> centile</strong></div>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="report-section">
+      <h2>3. Analyse détaillée par dimension</h2>
+      {% for da in analysis.dimensions %}
+        <div class="card mb-3">
+          <div class="progress-head">
+            <h3 class="mb-0">{{ da.result.name }}</h3>
+            <div class="right">
+              <strong>{{ da.result.percentage | percent }}</strong>
+              <span class="badge level-{{ da.result.level.code }}">{{ da.result.level.name }}</span>
+            </div>
+          </div>
+          <div class="progress"><i style="width:{{ da.result.percentage }}%;background:{{ da.result.color }}"></i></div>
+          <p class="mt-2">{{ da.narrative }}</p>
+          {% if premium and da.value_at_stake_xof %}
+            <p class="small"><strong>Valeur annuelle estimée en jeu :</strong> {{ da.value_at_stake_xof | xof }}</p>
+          {% endif %}
+          <div class="table-wrap mt-2">
+            <table class="compact">
+              <thead><tr><th>Critère</th><th class="num">Poids</th><th>Niveau déclaré</th><th class="num">Score</th></tr></thead>
+              <tbody>
+                {% for crit in da.result.criteria %}
+                  <tr>
+                    <td>{{ crit.name }}</td>
+                    <td class="num">{{ crit.weight }}</td>
+                    <td><span class="badge {{ 'badge-ok' if crit.answer == 3 else ('badge-info' if crit.answer == 2 else ('badge-warn' if crit.answer == 1 else 'badge-danger')) }}">{{ crit.answer }}</span>
+                      {{ crit.level_label }}</td>
+                    <td class="num">{{ crit.score }}/{{ crit.max_score }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="report-section">
+      <h2>4. Recommandations priorisées</h2>
+      <p class="muted">Classement par rendement : poids de la dimension × poids du critère × écart au niveau maximum.</p>
+      {% for reco in analysis.recommendations %}
+        <div class="reco">
+          <div class="reco-head">
+            <h4>{{ reco.priority_rank }}. {{ reco.action }}</h4>
+            <span class="badge {{ 'badge-danger' if reco.priority_label == 'Critique' else ('badge-warn' if reco.priority_label == 'Élevée' else 'badge-muted') }}">{{ reco.priority_label }}</span>
+            <span class="badge badge-muted">{{ reco.dimension_name }}</span>
+          </div>
+          <p class="small mb-0">{{ reco.why }}</p>
+          {% if premium %}
+            <ol>{% for step in reco.steps %}<li>{{ step }}</li>{% endfor %}</ol>
+          {% endif %}
+          <div class="reco-meta">
+            <span class="badge badge-muted">Effort {{ reco.effort }}</span>
+            <span class="badge badge-info">{{ reco.roi_driver_label }}</span>
+            <span class="badge badge-muted">Trimestre {{ reco.quarter }}</span>
+            <span class="badge badge-ok">+{{ reco.points_gain }} points</span>
+          </div>
+          <p class="small muted mt-2 mb-0"><strong>Indicateur de suivi :</strong> {{ reco.kpi }}<br>
+            <strong>Niveau actuel :</strong> {{ reco.current_label or 'non renseigné' }} →
+            <strong>niveau visé :</strong> {{ reco.target_label }}</p>
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if premium %}
+      <div class="report-section">
+        <h2>5. Feuille de route 12 mois</h2>
+        <div class="grid grid-2">
+          {% for quarter in analysis.roadmap %}
+            {% if quarter.recommendations %}
+              <div class="quarter">
+                <h3>{{ quarter.label }} — {{ quarter.theme }}
+                  <span class="badge badge-ok">+{{ quarter.points_gain }} pts</span></h3>
+                <ul style="padding-left:20px;font-size:.9rem">
+                  {% for reco in quarter.recommendations %}
+                    <li>{{ reco.action }} <span class="muted">— {{ reco.dimension_name }}, effort {{ reco.effort }}</span></li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="report-section">
+        <h2>6. Valeur en jeu et hypothèses</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Dimension</th><th class="num">Écart de maturité</th><th class="num">Valeur annuelle estimée</th></tr></thead>
+            <tbody>
+              {% for da in analysis.dimensions | sort(attribute='value_at_stake_xof', reverse=true) %}
+                <tr><td>{{ da.result.name }}</td>
+                  <td class="num">{{ (100 - da.result.percentage) | round | int }} pts</td>
+                  <td class="num">{{ da.value_at_stake_xof | xof }}</td></tr>
+              {% endfor %}
+              <tr><td><strong>Total</strong></td><td class="num">—</td>
+                <td class="num"><strong>{{ analysis.total_value_at_stake_xof | xof }}</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3 class="mt-3">Hypothèses de calcul</h3>
+        <ul class="small muted">{% for item in analysis.assumptions %}<li>{{ item }}</li>{% endfor %}</ul>
+      </div>
+
+      {% if analysis.quick_wins %}
+        <div class="report-section">
+          <h2>7. À lancer cette semaine</h2>
+          <p class="muted">Actions à effort faible et fort rendement, mobilisables sans budget d'investissement.</p>
+          <div class="grid grid-2">
+            {% for reco in analysis.quick_wins %}
+              <div class="card card-flat">
+                <strong>{{ reco.action }}</strong>
+                <p class="small muted mb-0">{{ reco.dimension_name }} · +{{ reco.points_gain }} points ·
+                  {{ reco.roi_driver_label }}</p>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    {% else %}
+      <div class="report-section no-print">
+        <div class="card">
+          <h3>Passer à l'offre Premium</h3>
+          <p class="mb-2">L'offre Premium ajoute la feuille de route 12 mois trimestrialisée,
+            les étapes de mise en oeuvre détaillées, l'estimation de la valeur en jeu par dimension
+            et une séance de restitution d'une heure.</p>
+          <a class="btn btn-primary" href="/paiement/{{ assessment.public_id }}/premium">Compléter vers Premium</a>
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="report-section">
+      <p class="small muted mb-0">Rapport établi par {{ settings.brand_owner }} — {{ settings.brand_name }}.
+        Grille de référence : Limpida Consulting 2024. Document destiné à l'usage interne de
+        {{ assessment.company_name }}. Contact : {{ settings.contact_email }} · {{ settings.contact_phone }}.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

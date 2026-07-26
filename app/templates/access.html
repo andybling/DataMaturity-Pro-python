@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Accès à votre rapport — {{ settings.brand_name }}{% endblock %}
+{% block body %}
+<section class="section">
+  <div class="wrap-narrow">
+    <h1>Retrouver votre rapport</h1>
+    <p class="muted">Saisissez le code d'accès reçu après votre commande.</p>
+    {% if errors %}
+      <div class="alert alert-error">{% for e in errors %}{{ e }}{% endfor %}</div>
+    {% endif %}
+    <form method="post" action="/acces" class="card">
+      <div class="field">
+        <label for="code">Code d'accès</label>
+        <input type="text" id="code" name="code" required placeholder="DM-XXXXXXXX"
+               style="text-transform:uppercase;letter-spacing:.06em;font-weight:600">
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">Ouvrir mon rapport</button>
+    </form>
+    <p class="small muted mt-2">Code perdu ? Écrivez à
+      <a href="mailto:{{ settings.contact_email }}">{{ settings.contact_email }}</a>
+      en précisant le nom de votre organisation.</p>
+  </div>
+</section>
+{% endblock %}

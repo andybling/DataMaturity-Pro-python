@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}{{ settings.brand_name }} — Diagnostic de maturité data{% endblock %}
+{% block body %}
+<section class="hero">
+  <div class="wrap split">
+    <div>
+      <span class="badge badge-lg">Grille Limpida Consulting 2024</span>
+      <h1 class="mt-2">Savoir où vous en êtes sur la data avant d'engager un budget</h1>
+      <p class="hero-lead">{{ criteria_count }} critères, 7 dimensions, un score sur {{ max_total_score }} points.
+        Dix minutes pour un diagnostic objectif de la maturité data de votre organisation,
+        avec un rapport que vous pouvez présenter en comité de direction.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="/diagnostic">Démarrer le diagnostic gratuit</a>
+        <a class="btn btn-ghost" href="/methodologie">Voir la méthodologie</a>
+      </div>
+      <div class="hero-meta">
+        <div><strong>{{ stats.completed }}</strong><span>diagnostics réalisés</span></div>
+        <div><strong>{{ stats.average | percent if stats.average else '—' }}</strong><span>score moyen constaté</span></div>
+        <div><strong>{{ stats.sectors }}</strong><span>secteurs représentés</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Ce que vous obtenez immédiatement</h3>
+      <ul class="plan" style="border:0;padding:0;box-shadow:none;display:block">
+        <li>Votre score global et votre niveau de maturité</li>
+        <li>Le détail chiffré des 7 dimensions</li>
+        <li>Un radar de positionnement imprimable</li>
+        <li>Vos forces et vos points de vigilance</li>
+      </ul>
+      <p class="small muted mb-0">Aucune carte bancaire demandée. Le rapport détaillé
+        avec recommandations et feuille de route est proposé ensuite, en option.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <h2>Les 7 dimensions évaluées</h2>
+    <p class="muted">Chaque dimension porte un poids stratégique (2 ou 3) et chaque critère un poids propre.
+      Un même effort ne produit donc pas le même gain selon l'endroit où il est investi.</p>
+    <div class="grid grid-3 mt-3">
+      {% for dim in dimensions %}
+        <div class="card card-flat">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
+            <h3 style="margin:0">{{ dim.short_name }}</h3>
+            <span class="badge {{ 'badge-danger' if dim.weight == 3 else 'badge-info' }}">Poids {{ dim.weight }}</span>
+          </div>
+          <p class="small muted mt-1 mb-0">{{ dim.criteria | length }} critères · {{ dim.max_score }} points maximum</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="progress-head">
+      <div>
+        <h2 class="mb-0">Offres et tarifs</h2>
+        <p class="muted">Affichage en FCFA, euro ou dollar. Paiement Mobile Money, carte bancaire ou virement.</p>
+      </div>
+      {% include "partials/currency_switch.html" %}
+    </div>
+    <div class="mt-3">{% include "partials/plans.html" %}</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap-narrow center">
+    <h2>Prêt à mesurer votre maturité data ?</h2>
+    <p class="muted">Dix minutes, {{ criteria_count }} questions, un résultat immédiat et sans engagement.</p>
+    <a class="btn btn-primary" href="/diagnostic">Démarrer maintenant</a>
+  </div>
+</section>
+{% endblock %}

@@ -39,7 +39,7 @@
           <select id="company_size" name="company_size" required>
             {% for s in sizes %}<option value="{{ s.code }}" {{ 'selected' if form and form.company_size == s.code else '' }}>{{ s.label }}</option>{% endfor %}
           </select>
-          <div class="hint">Sert de base à l'estimation de la valeur en jeu.</div>
+          <div class="hint">Aide à contextualiser la taille de votre organisation et l’ampleur du chantier.</div>
         </div>
       </div>
       <div class="field">

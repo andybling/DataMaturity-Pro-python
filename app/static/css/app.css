@@ -3,20 +3,20 @@
    ========================================================================== */
 
 :root {
-  --ink: #0f172a;
-  --ink-soft: #334155;
-  --muted: #64748b;
-  --line: #e2e8f0;
-  --bg: #ffffff;
-  --bg-soft: #f8fafc;
-  --bg-tint: #f1f5f9;
-  --brand: #4f46e5;
-  --brand-dark: #4338ca;
-  --brand-tint: #eef2ff;
-  --ok: #16a34a;
-  --warn: #ea580c;
-  --danger: #dc2626;
-  --info: #2563eb;
+  --ink: #2f1f16;
+  --ink-soft: #5f4334;
+  --muted: #7a5d49;
+  --line: #e7d8c8;
+  --bg: #fcf7f2;
+  --bg-soft: #f7efe7;
+  --bg-tint: #efe0d0;
+  --brand: #8b4a1f;
+  --brand-dark: #6f3720;
+  --brand-tint: #f4e3d2;
+  --ok: #6b4f2b;
+  --warn: #b45309;
+  --danger: #b91c1c;
+  --info: #8b5a2b;
   --radius: 14px;
   --radius-sm: 9px;
   --shadow: 0 1px 2px rgba(15, 23, 42, .06), 0 8px 24px -12px rgba(15, 23, 42, .14);
@@ -32,7 +32,7 @@ body {
   margin: 0;
   font-family: var(--font);
   color: var(--ink);
-  background: var(--bg);
+  background: linear-gradient(180deg, #fcf7f2 0%, #f7efe7 100%);
   font-size: 15.5px;
   line-height: 1.62;
   -webkit-font-smoothing: antialiased;

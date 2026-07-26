@@ -10,6 +10,7 @@ from app.services.pricing import (
     currency_for_country,
     format_amount,
     normalise_currency,
+    plan_views,
     price_for,
 )
 
@@ -30,6 +31,12 @@ def test_offre_gratuite_reste_gratuite():
         price = price_for("free", code)
         assert price.is_free
         assert price.minor_units == 0
+
+
+def test_les_offres_payantes_affichent_a_partir_de():
+    views = plan_views("XOF", codes=["standard", "premium"])
+    assert views[0].price_label.startswith("À partir de")
+    assert views[1].price_label.startswith("À partir de")
 
 
 def test_conversion_et_arrondi_commercial():

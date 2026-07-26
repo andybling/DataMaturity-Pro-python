@@ -380,7 +380,7 @@ class PlanView:
         if self.price.is_free:
             return "Gratuit"
         suffix = f" {self.plan.recurring}" if self.plan.recurring else ""
-        return f"{self.price.formatted}{suffix}"
+        return f"À partir de {self.price.formatted}{suffix}"
 
     @property
     def secondary_prices(self) -> List[str]:

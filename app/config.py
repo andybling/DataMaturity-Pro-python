@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     brand_name: str = "DataMaturity Pro"
     brand_owner: str = "Yves Mouaha Handy"
     brand_tagline: str = "Diagnostic de maturité data pour les organisations africaines"
-    contact_email: str = "yvesmouaha@yahoo.fr"
+    contact_email: str = "yves.mouaha@akilicorp.com"
     contact_phone: str = "+225 07 48 78 25 17"
     contact_whatsapp: str = "2250748782517"
 

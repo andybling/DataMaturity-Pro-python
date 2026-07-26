@@ -294,18 +294,18 @@ table.compact th, table.compact td { padding: 7px 10px; font-size: .84rem; }
   font-size: .82rem; color: var(--muted); display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
 
 /* ---------- console d'administration ---------- */
-.admin-shell { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
+.admin-shell { display: grid; grid-template-columns: 250px 1fr; min-height: 100vh; }
 @media (max-width: 900px) { .admin-shell { grid-template-columns: 1fr; } }
-.admin-side { background: var(--ink); color: #cbd5e1; padding: 22px 16px; }
+.admin-side { background: linear-gradient(180deg, #4d2b1c 0%, #3a1f14 100%); color: #f5e8db; padding: 24px 18px; border-right: 1px solid rgba(255,255,255,.12); }
 .admin-side .brand { color: #fff; margin-bottom: 24px; }
-.admin-side nav { display: flex; flex-direction: column; gap: 3px; }
-.admin-side nav a { color: #cbd5e1; padding: 9px 12px; border-radius: var(--radius-sm); font-size: .91rem; font-weight: 550; }
-.admin-side nav a:hover { background: #1e293b; color: #fff; text-decoration: none; }
-.admin-side nav a.on { background: var(--brand); color: #fff; }
-.admin-side .side-foot { margin-top: 26px; padding-top: 18px; border-top: 1px solid #1e293b; font-size: .8rem; color: #94a3b8; }
-.admin-main { padding: 28px 30px 60px; background: var(--bg-soft); }
+.admin-side nav { display: flex; flex-direction: column; gap: 6px; }
+.admin-side nav a { color: #f5e8db; padding: 10px 12px; border-radius: var(--radius-sm); font-size: .91rem; font-weight: 600; }
+.admin-side nav a:hover { background: rgba(255,255,255,.12); color: #fff; text-decoration: none; }
+.admin-side nav a.on { background: var(--brand-tint); color: var(--brand-dark); font-weight: 700; }
+.admin-side .side-foot { margin-top: 28px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,.16); font-size: .82rem; color: #e8cdb7; }
+.admin-main { padding: 28px 30px 60px; background: linear-gradient(180deg, #fcf7f2 0%, #f7efe7 100%); }
 .admin-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 18px; flex-wrap: wrap; margin-bottom: 24px; }
-.admin-head h1 { font-size: 1.6rem; margin: 0; }
+.admin-head h1 { font-size: 1.6rem; margin: 0; color: var(--brand-dark); }
 .filters { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 18px; }
 .filters .field { margin: 0; min-width: 150px; }
 .filters label { font-size: .76rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }

@@ -11,7 +11,7 @@ __pycache__/
 venv/
 
 # Données locales
-data/
+/data/
 *.db
 *.db-wal
 *.db-shm

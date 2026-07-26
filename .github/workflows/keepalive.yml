@@ -1,0 +1,17 @@
+name: Keep Render service awake
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Call health endpoint
+        env:
+          KEEPALIVE_URL: https://datamaturity-pro.onrender.com/healthz
+        run: |
+          curl -fsS --max-time 30 "$KEEPALIVE_URL" > /dev/null
